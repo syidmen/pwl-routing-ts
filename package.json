@@ -1,0 +1,30 @@
+{
+  "name": "pwl-routing-ts",
+  "version": "1.0.0",
+  "description": "Membuat project routing manual menggunakan typescript dan codespaces untuk menjalankan aplikasi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syidmen/pwl-routing-ts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/syidmen/pwl-routing-ts/issues"
+  },
+  "homepage": "https://github.com/syidmen/pwl-routing-ts#readme",
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "http": "^0.0.1-security"
+  }
+}
