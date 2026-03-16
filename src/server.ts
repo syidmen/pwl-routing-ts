@@ -1,47 +1,79 @@
-// Import modul http dari Node.js
 import * as http from 'http';
-// Tentukan port yang akan digunakan
-const PORT = 3000;
-// Buat server HTTP
+
+// 1. Data Statis
+const products = [
+  { id: 1, name: "Laptop" },
+  { id: 2, name: "Mouse" }
+];
+
+const users = [
+  { id: 123, name: "Alice", role: "Admin" },
+  { id: 456, name: "Bob", role: "User" }
+];
+
+const PORT = 3000; // Tugas no 4: Node.js di port 3000
+
 const server = http.createServer((req, res) => {
-    // Ambil URL dan metode HTTP dari objek request
-    // Jika req.url undefined, gunakan '/' sebagai default
-    const url = req.url || '/';
-    const method = req.method || 'GET';
-    // Tampilkan log di terminal (untuk debugging)
-    console.log(`[${new Date().toLocaleTimeString()}] ${method} ${url}`);
-    // --- ROUTING MANUAL DENGAN PERCABANGAN ---
-    // Kita akan memeriksa kombinasi url dan method
-    // Rute: GET /
-    if (url === '/' && method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end('<h1>🏠 Halaman Utama</h1><p>Selamat datang di server Node.js + TypeScript!</p>');
+  // --- 3. MIDDLEWARE: LOG WAKTU ---
+  const start = performance.now(); // Mulai hitung waktu
+  
+  const url = req.url || '/';
+  const method = req.method || 'GET';
+
+  // Helper untuk mengirim JSON (agar tidak menulis res.writeHead berulang kali)
+  const sendJSON = (status: number, data: any) => {
+    res.writeHead(status, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+  };
+
+  // --- 1. RUTE PRODUK ---
+  if (url === '/products' && method === 'GET') {
+    sendJSON(200, products);
+  } 
+  else if (url === '/products' && method === 'POST') {
+    sendJSON(201, { message: "Produk berhasil ditambahkan (Node.js Simulasi)" });
+  }
+
+  // --- 2. RUTE USER DINAMIS (/users/:id) ---
+  else if (url.startsWith('/users/') && method === 'GET') {
+    const pathParts = url.split('/'); // ["", "users", "123"]
+    const idRaw = pathParts[2];
+    const userId = parseInt(idRaw);
+
+    if (isNaN(userId)) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end("ID harus berupa angka");
+    } else {
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        sendJSON(200, user);
+      } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end("User Tidak Ditemukan");
+      }
     }
-    // Rute: GET /about
-    else if (url === '/about' && method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end('<h1>📄 Tentang Kami</h1><p>Ini adalah contoh routing manual sederhana.</p>');
-    }
-    // Rute: GET /api/users (mengembalikan data JSON)
-    else if (url === '/api/users' && method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify([
-        { id: 1, name: 'Alice' },
-        { id: 2, name: 'Bob' }
-        ]));
-    }
-    // Rute: POST /api/users (simulasi tambah user)
-    else if (url === '/api/users' && method === 'POST') {
-        res.writeHead(201, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'User berhasil dibuat (contoh)' }));
-    }
-    // Jika tidak ada rute yang cocok → 404 Not Found
-    else {
-        res.writeHead(404, { 'Content-Type': 'text/html' });
-        res.end('<h1>❌ 404 - Halaman Tidak Ditemukan</h1>');
-    }
+  }
+
+  // Rute Utama
+  else if (url === '/' && method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end('<h1>🏠 Server Node.js</h1><p>Gunakan /products atau /users/123</p>');
+  }
+
+  // Default 404
+  else {
+    res.writeHead(404, { 'Content-Type': 'text/html' });
+    res.end('<h1>❌ 404 - Halaman Tidak Ditemukan</h1>');
+  }
+
+  // --- SELESAI MIDDLEWARE: HITUNG DURASI ---
+  // Kita gunakan event 'finish' agar waktu yang dihitung benar-benar sampai respons selesai dikirim
+  res.on('finish', () => {
+    const duration = (performance.now() - start).toFixed(4);
+    console.log(`[${new Date().toLocaleTimeString()}] ${method} ${url} - ${duration}ms`);
+  });
 });
-// Jalankan server, dengarkan di port yang ditentukan
+
 server.listen(PORT, () => {
-console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+  console.log(`🚀 Node.js Server berjalan di http://localhost:${PORT}`);
 });
